@@ -1,0 +1,468 @@
+@extends('global.main')
+@section('title', "PUP | Support")
+
+@section('page-css')
+<!-- ================== BEGIN PAGE LEVEL STYLE ================== -->
+
+<link href="{{asset('assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css')}}" rel="stylesheet" />
+<link href="{{asset('assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css')}}" rel="stylesheet" />
+<link href="{{asset('assets/css/timeline.css')}}" rel="stylesheet" />
+<link href="../assets/plugins/dropzone/min/dropzone.min.css" rel="stylesheet" />
+<script src="{{asset('assets/plugins/pace/pace.min.js')}}"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<!-- ================== END PAGE LEVEL STYLE ================== -->
+
+@endsection
+
+@section('content')	
+
+
+
+<!-- begin #page-loader -->
+<div id="page-loader" class="fade show"><span class="spinner"></span></div>
+<!-- end #page-loader -->
+@if(session('is_admin') == 1)
+@include('admin.include.header')
+@else
+@include('user.include.header')
+@endif
+<!-- begin #content -->
+<div id="content" class="content">
+	
+	<!-- begin breadcrumb -->
+	<ol class="breadcrumb pull-right">
+		<li class="breadcrumb-item"><a href="javascript:;">Home</a></li>
+		<li class="breadcrumb-item active">Dashboard</li>
+	</ol>
+	<!-- end breadcrumb -->
+	<!-- begin page-header -->
+	<h1 class="page-header">Manage Ticket <small></small></h1>
+	<!-- end page-header -->
+
+
+
+
+	<div class="conts col-lg-12" style="position:absolute;">
+	  <ul class="timeline">
+	    <li class="active">Bacon</li>
+	    <li>Rib</li>
+	    <li>Rib</li>
+	    <li>Sausage</li>
+
+	  </ul>
+	</div>
+
+
+	<!-- begin col-6 -->
+			    <div class="col-lg-12" style="">
+			        <!-- begin panel -->
+			        <div class="panel panel-inverse" data-sortable-id="ui-media-object-1" >
+                        <!-- begin panel-heading -->
+                        <div class="panel-heading">
+                            <div class="panel-heading-btn">
+                                <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand"><i class="fa fa-expand"></i></a>
+                                <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-success" data-click="panel-reload"><i class="fa fa-redo"></i></a>
+                                <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-warning" data-click="panel-collapse"><i class="fa fa-minus"></i></a>
+                                <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-danger" data-click="panel-remove"><i class="fa fa-times"></i></a>
+                            </div>
+                            <h4 class="panel-title">Ticket</h4>
+                        </div>
+                        <!-- end panel-heading -->
+                        <!-- begin panel-body -->
+                        <div class="panel-body " id="scroll_x" style="overflow-y:scroll; height:300px; display:block; border: solid">
+                        	
+							
+							@foreach($data as $val)
+								@if($val->history_user_id != session('user'))
+									<div class="media media-sm">
+										<a class="media-left" href="javascript:;">
+											<img src="../assets/img/user/user-1.jpg" alt="" class="media-object" />
+										</a>
+										<div class="media-body">
+											<h5 class="media-heading">{{$val->user_fname}} {{$val->user_lname}}</h5>
+											<p style="padding-right: 150px">{{$val->ticket_details}}</p>
+											<small   >{{$val->created_at}}</small>
+										</div>
+									</div>
+								@else
+									<div class="media media-sm">
+											
+											<div class="media-body">
+												<h5 class="media-heading pull-right">{{$val->user_fname}} {{$val->user_lname}}</h5><br><br>
+												<p style="padding-left: 150px" class="pull-right">{{$val->ticket_details}}</p><br><br>
+												<small class="pull-right">{{$val->created_at}}</small>
+											</div>
+											<a class="media-left pull-right" href="javascript:;">
+												<img src="../assets/img/user/user-1.jpg" alt="" class="media-object" />
+											</a>
+										</div>
+								@endif
+								@break
+							@endforeach
+                        	@foreach($data as $val)
+                        		
+                        		@if($val->history_status == 'answer' || $val->history_status == 'admin answer')
+                        			@if($val->history_user_id != session('user'))
+	                        			<div class="media media-sm">
+											<a class="media-left" href="javascript:;">
+												<img src="../assets/img/user/user-1.jpg" alt="" class="media-object" />
+											</a>
+											<div class="media-body">
+												<h5 class="media-heading">{{$val->user_fname}} {{$val->user_lname}}</h5>
+												<p style="padding-right: 150px">{{$val->response_issue}}</p>
+												@foreach($file as $f)
+													@if($f->file_upload_history_id == $val->history_id)
+													<a class="upl_file" href="{{asset('upload')}}/{{session('user')}}/{{$f->file_upload_ticket_id}}/{{$f->file_upload_name}}">{{$f->file_upload_name}}</a><br>
+													@endif
+												@endforeach
+												<small   >{{$val->created_at}}</small>
+											</div>
+										</div>
+									@else
+										<div class="media media-sm">
+											
+											<div class="media-body">
+												<h5 class="media-heading pull-right">{{$val->user_fname}} {{$val->user_lname}}</h5><br><br>
+												<p style="padding-left: 150px" class="pull-right">{{$val->response_issue}}</p><br><br>
+												@foreach($file as $f)
+													@if($f->file_upload_history_id == $val->history_id)
+													<a class="pull-right upl_file" href="{{asset('upload')}}/{{session('user')}}/{{$f->file_upload_ticket_id}}/{{$f->file_upload_name}}">{{$f->file_upload_name}}</a><br>
+													@endif
+												@endforeach
+												<small class="pull-right">{{$val->created_at}}</small>
+											</div>
+											<a class="media-left pull-right" href="javascript:;">
+												<img src="../assets/img/user/user-1.jpg" alt="" class="media-object" />
+											</a>
+										</div>
+										<hr>
+
+									@endif
+
+								@endif
+								@if($val->history_status == 'transfer')
+									<div class="media-body">
+												<center><h5 >Transfered to {{$val->department_name}}</h5></center>
+												<center><small class="">{{$val->created_at}}</small></center>
+											</div>
+										<hr>
+									
+								@endif
+								@if($val->history_status == 'closed')
+									
+										<div class="media media-sm">
+											
+											<div class="media-body">
+												<center><h5 >Ticket has been Closed</h5></center>
+												<center><small class="">{{$val->created_at}}</small></center>
+											</div>
+											
+										</div>
+										<hr>
+								@endif
+							@endforeach
+                        		
+					
+
+								
+							
+								<div class="div_reply"></div>
+							
+							<div class="media media-sm col-lg-12" >
+
+									
+									
+								
+							</div>
+						</div>
+						<!-- end panel-body -->
+
+						@foreach($data as $val)
+
+
+							<div class="media media-sm" style="padding: 20px; padding-bottom: 0">
+								
+								<div class="media-body" style="padding: 10px">
+									<input type="text" hidden value="{{$val->ticket_id}}" id="txt_ticket_id">
+									<input type="text" hidden value="{{$val->ticket_user_id}}" id="txt_ticket_user_id">
+									<input type="text" hidden value="{{$val->history_department}}" id="txt_history_department">
+								
+									@if($val->ticket_status != 'closed')
+										@if(session('is_admin') == '1')
+											<button class="btn btn-success pull-right" id="btn_transfer">Transfer</button>
+											<button class="btn btn-success pull-right" style="margin-right: 10px" id="btn_closed">Close ticket</button>
+										@endif
+
+									@endif
+									@if($val->ticket_status == 'closed')
+										@if(session('is_admin') == '1')
+											<button class="btn btn-success pull-right">Reopen</button>
+										@endif
+										
+									@endif
+									<h5 class="media-heading">Ticket No.: {{$val->ticket_no}}</h5>
+									<h5 class="media-heading" style="text-transform: capitalize;">Ticket Status: {{$val->ticket_status}}</h5>
+									@if(session('is_admin') == '1')
+									<h5 class="media-heading" style="text-transform: capitalize;">Priority: {{$val->priority_name}}</h5>
+									@endif
+								</div>
+							</div>
+
+							@if($val->ticket_status != 'closed')
+
+							
+
+						
+
+								<div class="media-body" style="padding: 20px; padding-top: 0">
+									<textarea class="form-control" id="txt_reply"></textarea>
+									<br>
+									<button class="btn btn-success pull-right" id="btn_submit">Submit</button>
+								</div>
+								
+									
+							          <form action="{{ route('multifileupload') }}" enctype="multipart/form-data" class="dropzone" id="fileupload" method="POST">
+							            @csrf
+							            <div class="fallback">
+							              <input name="file" type="files" multiple accept="image/jpeg, image/png, image/jpg" />
+							              
+							            </div>
+							            <input type="text" name="ticket_id" id="ticket_id" value="{{$val->ticket_id}}" hidden>
+							          </form>
+							  
+								
+							@endif
+							@break
+						@endforeach
+                    </div>
+			        <!-- end panel -->
+				</div>
+			    <!-- end col-6 -->
+
+			    {{-- <iframe id="frame_upload" style="height: 1200px; width: 800px;"></iframe> --}}
+			    <div class="modal fade preview" id="modal_transfer">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h4 class="modal-title">Modal Dialog</h4>
+								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+							</div>
+							<div class="modal-body">
+								<label>Department</label>
+								<select class="form-control" id="sel_department">
+									@foreach($department as $val)
+										<option value="{{$val->department_id}}">{{$val->department_name}}</option>
+									@endforeach
+								</select>
+							</div>
+							<div class="modal-footer">
+								<a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>
+								<a href="javascript:;" class="btn btn-success" id="btn_modal_transfer">Transfer</a>
+							</div>
+						</div>
+					</div>
+				</div>
+
+	</div>
+
+
+
+@section('page-js')
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.4.0/dropzone.js"></script>
+	<script src="../assets/plugins/dropzone/min/dropzone.min.js"></script>
+	<script src="../assets/plugins/highlight/highlight.common.js"></script>
+	<script src="../assets/js/demo/render.highlight.js"></script>
+<script>
+
+    
+	var objDiv = document.getElementById("scroll_x");
+	objDiv.scrollTop = objDiv.scrollHeight;
+		  Dropzone.options.fileupload = {
+			accept: function (file, done) {
+				if (file.type != "application/vnd.ms-excel" && file.type != "image/jpeg, image/png, image/jpg") {
+					done("Error! Files of this type are not accepted");
+				} else {
+					done();
+				}
+			}
+		}
+
+		Dropzone.options.fileupload = {
+			autoProcessQueue: false,
+			maxFiles: 5,
+			maxFilesize: 20,
+			acceptedFiles: "image/*,application/pdf,.doc,.docx,.xls,.xlsx,.csv,.tsv,.ppt,.pptx,.pages,.odt,.rtf",
+		}
+
+		if (typeof Dropzone != 'undefined') {
+			Dropzone.autoDiscover = false;
+		};
+
+
+		 (function ($, window, undefined) {
+			"use strict";
+
+			$(document).ready(function () {
+	    // Dropzone Example
+	    if (typeof Dropzone != 'undefined') {
+	    	if ($("#fileupload").length) {
+	    		var dz = new Dropzone("#fileupload"),
+	    		dze_info = $("#dze_info"),
+	    		status = {
+	    			uploaded: 0,
+	    			errors: 0
+	    		};
+	    		var $f = $('<tr><td class="name"></td><td class="size"></td><td class="type"></td><td class="status"></td></tr>');
+	    		dz.on("success", function (file, responseText) {
+
+	    			var _$f = $f.clone();
+
+	    			_$f.addClass('success');
+
+	    			_$f.find('.name').html(file.name);
+	    			if (file.size < 1024) {
+	    				_$f.find('.size').html(parseInt(file.size) + ' KB');
+	    			} else {
+	    				_$f.find('.size').html(parseInt(file.size / 1024, 10) + ' KB');
+	    			}
+	    			_$f.find('.type').html(file.type);
+	    			_$f.find('.status').html('Uploaded <i class="entypo-check"></i>');
+
+	    			dze_info.find('tbody').append(_$f);
+
+	    			status.uploaded++;
+
+	    			dze_info.find('tfoot td').html('<span class="label label-success">' + status.uploaded + ' uploaded</span> <span class="label label-danger">' + status.errors + ' not uploaded</span>');
+	    			alert('Your File Uploaded Successfully!!')
+
+	    		})
+	    		.on('error', function (file) {
+	    			var _$f = $f.clone();
+
+	    			dze_info.removeClass('hidden');
+
+	    			_$f.addClass('danger');
+
+	    			_$f.find('.name').html(file.name);
+	    			_$f.find('.size').html(parseInt(file.size / 1024, 10) + ' KB');
+	    			_$f.find('.type').html(file.type);
+	    			_$f.find('.status').html('Uploaded <i class="entypo-cancel"></i>');
+
+	    			dze_info.find('tbody').append(_$f);
+
+	    			status.errors++;
+
+	    			dze_info.find('tfoot td').html('<span class="label label-success">' + status.uploaded + ' uploaded</span> <span class="label label-danger">' + status.errors + ' not uploaded</span>');
+
+	    			alert('Your File not Uploaded Successfully!!')
+	    		});
+	    	}
+	    }
+	});})(jQuery, window); 
+
+	$("#btn_closed").click(function(){
+		ticket_id = $("#txt_ticket_id").val()
+		history_dept = $("#txt_history_department").val()
+		creator_user_id = $("#txt_ticket_user_id").val()
+		$.ajax({
+            url:'{{route('closedTicket')}}',
+            type:'POST',
+            
+            data: {
+              "_token": "{{ csrf_token() }}"
+              ,'ticket_id':ticket_id
+              ,'user_id':'{{session('user')}}'
+              ,'history_dept':history_dept
+              ,'creator_user_id':creator_user_id
+            },
+            success:function(data)
+            {
+              window.location.reload()
+            }
+        })  
+	})
+
+
+	$("#btn_transfer").click(function(){
+		$("#modal_transfer").modal('show')
+	})
+
+	$("#btn_modal_transfer").click(function(){
+		ticket_id = $("#txt_ticket_id").val()
+		department = $("#sel_department").val()
+		history_dept = $("#txt_history_department").val()
+		alert(ticket_id)
+		$.ajax({
+            url:'{{route('transferDepartment')}}',
+            type:'POST',
+            
+            data: {
+              "_token": "{{ csrf_token() }}"
+              ,'ticket_id':ticket_id
+              ,'department':department
+              ,'user_id':'{{session('user')}}'
+              ,'history_dept':history_dept
+              
+            },
+            success:function(data)
+            {
+              console.log(data)
+              
+               
+            }
+        })  
+	});
+
+	$("#btn_submit").click(function(){
+		
+		reply = $("#txt_reply").val()
+		ticket_id = $("#txt_ticket_id").val()
+		history_dept = $("#txt_history_department").val()
+		creator_user_id = $("#txt_ticket_user_id").val()
+		alert(ticket_id)
+		$.ajax({
+            url:'{{route('insertResponse')}}',
+            type:'POST',
+            
+            data: {
+              "_token": "{{ csrf_token() }}"
+              ,'reply':reply
+              ,'ticket_id':ticket_id
+              ,'user_id':'{{session('user')}}'
+              ,'history_dept':history_dept
+              ,'creator_user_id':creator_user_id
+
+              
+            },
+            success:function(data)
+            {
+              // alert(Dropzone.forElement(".dropzone").files.length)
+              Dropzone.forElement(".dropzone").processQueue();
+              console.log(data)
+              if(data['data'] == true){
+              	$(".div_reply").append('<hr><div class="media media-sm "><div class="media-body "><h5 class="media-heading pull-right">{{session('user_name')}}</h5><br><br><p style="padding-left: 150px;" class="pull-right">'+reply+'</p><br><br>	<small class="pull-right"  >{{now()}}</small></div><a class="media-right" href="javascript:;">	<img src="../assets/img/user/user-1.jpg" alt="" class="media-object" />	</a></div>')
+              	$("#txt_reply").val('')
+              	objDiv.scrollTop = objDiv.scrollHeight;
+              }
+              else{
+              	alert('error')
+              }
+              
+               
+            }
+        })  
+	})
+
+
+	
+
+	$(document).ready(function() {
+		App.init();
+	});
+</script>
+
+<script type="text/javascript">
+ 
+</script>
+@endsection
+@endsection
