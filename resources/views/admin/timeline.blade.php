@@ -12,6 +12,7 @@
 <script src="{{asset('assets/plugins/pace/pace.min.js')}}"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <link href="{{asset('assets/plugins/bootstrap-wysihtml5/dist/bootstrap3-wysihtml5.min.css')}}" rel="stylesheet" />
+
 <!-- ================== END PAGE LEVEL STYLE ================== -->
 <style type="text/css">
 	#refresh_task{
@@ -50,52 +51,295 @@
 	<!-- end page-header -->
 	<div id="dze_info"></div>
 
+	<div class="row">
+		<div class="col-lg-8">
+		        <!-- begin panel -->
+		        <div class="panel panel-inverse" data-sortable-id="ui-media-object-4">
+	                <!-- begin panel-heading -->
+	                <div class="panel-heading">
+	                   
+	                    @foreach($data as $val)
+	                    	<h4 class="panel-title">{{$val->ticket_summary}}</h4>
+	                    	@break
+	                    @endforeach
+	                </div>
+	                <!-- end panel-heading -->
+	                <!-- begin panel-body -->
+	                <div class="panel-body">
+	                	<div  class="px-4 py-5 chat-box bg-white" id="scroll_x" style="overflow-y:scroll; height:500px; display:block;" onscroll="scroll()">
+			                <ul class="media-list media-list-with-divider">
+								<div id="refresh" onscroll="scroll()"></div>
+							</ul>
+						</div>
+						<div class="col-lg-12" style="padding: 10px">
+							
+							
+							@if($val->ticket_status != 'closed')
+							<button class="btn btn-info" id="btn_transfer" title="Transfer Ticket"><i class="fa fa-arrow-alt-circle-right fa-flip-vertical"></i></button>
+							<button class="btn btn-danger" id="btn_closed" title="Closed Ticket"><i class="fa fa-times-circle"></i></button>
+							<button class="btn btn-success" id="btn_create_ticket" title="Create Ticket"><i class="fa fa-plus-circle"></i></button>
 
-	<div class="col-lg-12">
-	        <!-- begin panel -->
-	        <div class="panel panel-inverse" data-sortable-id="ui-media-object-4">
-                <!-- begin panel-heading -->
-                <div class="panel-heading">
-                    <div class="panel-heading-btn">
-                        <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand"><i class="fa fa-expand"></i></a>
-                        <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-success" data-click="panel-reload"><i class="fa fa-redo"></i></a>
-                        <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-warning" data-click="panel-collapse"><i class="fa fa-minus"></i></a>
-                        <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-danger" data-click="panel-remove"><i class="fa fa-times"></i></a>
-                    </div>
-                    @foreach($data as $val)
-                    	<h4 class="panel-title">{{$val->ticket_summary}}</h4>
-                    	@break
-                    @endforeach
-                </div>
-                <!-- end panel-heading -->
-                <!-- begin panel-body -->
-                <div class="panel-body">
-                	<div  class="px-4 py-5 chat-box bg-white" id="scroll_x" style="overflow-y:scroll; height:500px; display:block;" onscroll="scroll()">
-		                <ul class="media-list media-list-with-divider">
-							<div id="refresh" onscroll="scroll()"></div>
-						</ul>
+
+						</div>
+						<div class="input-group mb-3">
+						  
+						  <textarea type="text" class="form-control" id="txt_reply" rows="3"></textarea>
+						  <div class="input-group-prepend">
+						    <button class="fa fa-paper-plane" type="button" id="btn_submit" ></button>
+						  </div>
+						</div>
+						<form action="{{ route('multifileupload') }}" enctype="multipart/form-data" class="dropzone" id="chatUpload" method="POST" >
+							@csrf
+							 <div class="fallback">
+							    <input name="file" type="file" multiple />
+							  </div>
+							<input type="text" name="ticket_id"  value="{{$val->ticket_id}}" hidden>
+						</form>
+						@elseif($val->ticket_status == 'closed')
+						<button class="btn btn-success" id="btn_reopen" title="Reopen Ticket"><i class="fa fa-lock-open"></i></button>
+						@endif
 					</div>
-					<div class="col-lg-12" style="padding: 10px">
-						<button class="btn"><i class="fa fa-paperclip"></i></button>
-						<button class="btn"><i class="fa fa-arrow-alt-circle-right fa-flip-vertical"></i></button>
-						<button class="btn"><i class="fa fa-times-circle"></i></button>
-						<button class="btn"><i class="fa fa-plus-circle"></i></button>
-					</div>
-					<div class="col-lg-12 row">
-						<form action="/" name="wysihtml5" method="POST" class="col-lg-10">
-						<textarea class="textarea form-control" id="wysihtml5" placeholder="Enter text ..." rows="1"></textarea>
-					</form>
-					<button class="col-lg-2"><i class="fa fa-plus-circle"></i></button>	
-					</div>
-					
+
+					<!-- end panel-body -->
 				</div>
-
-				<!-- end panel-body -->
-			</div>
-	        <!-- end panel -->
+		        <!-- end panel -->
 		</div>
+		
+		<div class="col-lg-4" >
+			<div id="accordion" class="card-accordion">
+				<div class="card">
+					<div class="card-header bg-black text-white pointer-cursor collapsed" data-toggle="collapse" data-target="#collapseInfo">
+						Ticket Information
+					</div>
+					<div id="collapseInfo" class="collapse show" data-parent="#accordion" >
+						<div class="card-body">
+							<div class="panel-body">
+								@foreach($data as $val)
+									<input type="text" hidden value="{{$val->ticket_id}}" id="txt_ticket_id">
+									<div class="row">
+										<div class="col-lg-12">
+											<div class="row">
+												<h5>Ticket No:</h5>
+												<p>&nbsp &nbsp {{$val->ticket_no}}</p>
+											</div>
+										</div>
+										<div class="col-lg-12">
+											<div class="row">
+												<h5>Status:</h5>
+												<p>&nbsp &nbsp {{$val->history_status}}</p>
+											</div>
+										</div>
+										
+										<div class="col-lg-12">
+											<div class="row">
+												<h5>Email:</h5>
+												<p>&nbsp &nbsp {{$val->user_email}}</p>
+											</div>
+										</div>
+										<div class="col-lg-12">
+											<div class="row">
+												<h5>Priority:</h5>
+												<p id="p_priority">&nbsp &nbsp {{$val->ticket_priority}}</p>
+												<select id="sel_update_priority" class="form-control">
+													@foreach($priority as $prio)
+														
+														<option  value="{{$prio->priority_id}}">{{$prio->priority_name}}</option>
+													@endforeach
+												</select>
+											</div>
+										</div>
+										<div class="col-lg-12">
+											<div class="row">
+												<h5>Summary:</h5>
+												<p id="p_summary">&nbsp &nbsp {{$val->ticket_summary}}</p>
+												<input type="text" name=""  id="txt_update_summary" class="form-control" placeholder="{{$val->ticket_summary}}">
+											</div>
+										</div>
+										<div class="col-lg-12">
+											<div class="row">
+												<h5>Topic:</h5>
+												<p id="p_topic">&nbsp &nbsp {{$val->topic_summary}}</p>
+												<select id="sel_update_topic" class="form-control">
+													@foreach($topic as $row)
+														
+														<option  value="{{$row->topic_id}}">{{$row->topic_summary}}</option>
+													@endforeach
+												</select>
+											</div>
+										</div>
+										<div class="col-lg-12" style="margin-top: 10px">
+												<button class="btn btn-success float-right" id="btn_edit">Edit Ticket</button>
+												<button class="btn btn-danger float-right" id="btn_cancel_edit" style="margin-right: 5px">Cancel</button>
+										</div>
+									</div>
+									
+									@break
+								@endforeach
+							</div>
+						</div>
+					</div>
+					<!-- begin card -->
+				<div class="card">
+					<div class="card-header bg-black text-white pointer-cursor collapsed" data-toggle="collapse" data-target="#collapseOne">
+						Ticket History
+					</div>
+					<div id="collapseOne" class="collapse " data-parent="#accordion" >
+						<div class="card-body" style="overflow-y:scroll; height:500px;"  onscroll="scroll()">
+							<div class="panel-body">
+								@foreach($history as $val)
+								@if($val->history_status == 'open')
+								<div class="media media-sm">
+									<a class="media-left" href="javascript:;">
+										<img src="../assets/img/user/new-ticket.png" alt="" class="media-object img-thumbnail" style="height: 50px; width:50px" />
+									</a>
+									<div class="media-body">
+										<h5 class="media-heading">Ticket Created</h5>
+										<p>{{$val->created_at}}</p>
+									</div>
+								</div>
+								@elseif($val->history_status == 'admin answer' || $val->history_status == 'admin reply')
+								<div class="media media-sm">
+									<a class="media-left" href="javascript:;">
+										<img src="../assets/img/user/answered.png" alt="" class="media-object img-thumbnail" style="height: 50px; width:50px" />
+									</a>
+									<div class="media-body">
+										<h5 class="media-heading">Admin Reply</h5>
+										<p>{{$val->created_at}}</p>
+									</div>
+								</div>
+								@elseif($val->history_status == 'user reply' )
+								<div class="media media-sm">
+									<a class="media-left" href="javascript:;">
+										<img src="../assets/img/user/user-answered.png" alt="" class="media-object img-thumbnail" style="height: 50px; width:50px" />
+									</a>
+									<div class="media-body">
+										<h5 class="media-heading">User Reply</h5>
+										<p>{{$val->created_at}}</p>
+									</div>
+								</div>
+								@elseif($val->history_status == 'closed')
+								<div class="media media-sm">
+									<a class="media-left" href="javascript:;">
+										<img src="../assets/img/user/ticket-closed.png" alt="" class="media-object img-thumbnail" style="height: 50px; width:50px" />
+									</a>
+									<div class="media-body">
+										<h5 class="media-heading">Ticket Closed</h5>
+										<p>{{$val->created_at}}</p>
+									</div>
+								</div>
+								@elseif($val->history_status == 'Overdue')
+								<div class="media media-sm">
+									<a class="media-left" href="javascript:;">
+										<img src="../assets/img/user/ticket-overdue.png" alt="" class="media-object img-thumbnail" style="height: 50px; width:50px" />
+									</a>
+									<div class="media-body">
+										<h5 class="media-heading">Ticket Overdue</h5>
+										<p>{{$val->created_at}}</p>
+									</div>
+								</div>
+								@elseif($val->history_status == 'transfer')
+								<div class="media media-sm">
+									<a class="media-left" href="javascript:;">
+										<img src="../assets/img/user/ticket-transfer.png" alt="" class="media-object img-thumbnail" style="height: 50px; width:50px" />
+									</a>
+									<div class="media-body">
+										<h5 class="media-heading">Ticket Transfered</h5>
+										<p>{{$val->created_at}}</p>
+									</div>
+								</div>
+								@endif
+								@endforeach
+							</div>
+						</div>
+					</div>
+					<div class="card">
+						<div class="card-header bg-black text-white pointer-cursor collapsed" data-toggle="collapse" data-target="#collapseTwo">
+							Task
+						</div>
+						<div id="collapseTwo" class="collapse" data-parent="#accordion">
+							<div class="card-body">
+								<table id="tbl_task_unassigned" class="table table-striped table-bordered">
+									<thead>
+										<tr>
+											
+											<th class="text-nowrap">Task Information</th>
+											<th class="text-nowrap" width="30%">Action</th>
+										</tr>
+									</thead>
+									<tbody>
+										@foreach($task as $val)
+										<tr class="odd gradeX" id="{{$val->task_id}}">
+											
+											<td>
+												<p hidden>{{$val->task_id}}</p>
 
-	
+												<b style="margin-left: 20px; font-size: 15px">Task Summary:</b> 
+												<a style=" font-size: 15px; text-transform: uppercase; ">&nbsp&nbsp {{$val->task_summary}}</a>
+												<br>
+												<b style="margin-left: 20px; font-size: 15px">Task Details:</b> 
+												<a style=" font-size: 15px; text-transform: uppercase; ">&nbsp&nbsp {{$val->task_details}}</a>
+												
+											</td>
+											<td>
+												<button class="btn btn-success" id="btn_add_task">Add</button>
+											</td>
+											
+										</tr>
+										@endforeach
+
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div class="card">
+						<div class="card-header bg-black text-white pointer-cursor collapsed" data-toggle="collapse" data-target="#collapseThree">
+							Task Assigned
+						</div>
+						<div id="collapseThree" class="collapse" data-parent="#accordion">
+							<div class="card-body">
+								<table id="tbl_task_assigned" class="table table-striped table-bordered">
+										<thead>
+											<tr>
+												
+												<th class="text-nowrap">Task Information</th>
+												<th class="text-nowrap" width="30%">Action</th>
+
+											</tr>
+										</thead>
+										<tbody>
+											@foreach($task_assigned as $val)
+											<tr class="odd gradeX">
+												<td>
+													<p hidden>{{$val->task_id}}</p>
+		
+													<b style="margin-left: 20px; font-size: 15px">Task Summary:</b> 
+													<a style=" font-size: 15px; text-transform: uppercase; ">&nbsp&nbsp {{$val->task_summary}}</a>
+													<br>
+													<b style="margin-left: 20px; font-size: 15px">Task Details:</b> 
+													<a style=" font-size: 15px; text-transform: uppercase; ">&nbsp&nbsp {{$val->task_details}}</a>
+													
+												</td>
+												<td>
+													@if($val->is_done == 0)
+														<button class="btn btn-success" id="btn_done">View</button>
+													@else
+														<button class="btn btn-info"  disabled>Done</button>
+													@endif
+												</td>
+											</tr>
+
+											@endforeach
+
+										</tbody>
+									</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 	 <div class="col-lg-12" >
 			    	<!-- begin nav-tabs -->
 					<ul class="nav nav-tabs">
@@ -146,9 +390,9 @@
 											@if($val->ticket_agent == session('user') || $val->ticket_agent == 0 || $val->ticket_user_id == session('user'))
 											@if($val->ticket_status != 'closed')
 											@if(session('is_admin') == '1' || session('is_agent') == '1')
-											<button class="btn btn-success pull-right" id="btn_create_ticket">Create Ticket</button>
-											<button class="btn btn-success pull-right"  style="margin-right: 10px" id="btn_transfer">Transfer</button>
-											<button class="btn btn-success pull-right" style="margin-right: 10px" id="btn_closed">Close ticket</button>
+											<button class="btn btn-success pull-right" id="">Create Ticket</button>
+											<button class="btn btn-success pull-right"  style="margin-right: 10px" id="">Transfer</button>
+											<button class="btn btn-success pull-right" style="margin-right: 10px" id="">Close ticket</button>
 											@endif
 
 											@endif
@@ -171,18 +415,12 @@
 									<div>
 										<form action="/" name="wysihtml5" class="wysihtml5" method="">
 																
-											<textarea class="textarea form-control" id="txt_reply" placeholder="Enter text ..." rows="5"></textarea>
-											<button  type="button" class="btn btn-info btn-white pull-right" id="btn_submit" style="margin-top: 5px;"> <i class="fa fa-paper-plane"></i>Submit</button>
+											<textarea class="textarea form-control" id="" placeholder="Enter text ..." rows="5"></textarea>
+											<button  type="button" class="btn btn-info btn-white pull-right" id="" style="margin-top: 5px;"> <i class="fa fa-paper-plane"></i>Submit</button>
 										</form>
 
 									</div>
-									<form action="{{ route('multifileupload') }}" enctype="multipart/form-data" class="dropzone" id="chatUpload" method="POST">
-										@csrf
-										 <div class="fallback">
-										    <input name="file" type="file" multiple />
-										  </div>
-										<input type="text" name="ticket_id"  value="{{$val->ticket_id}}" hidden>
-									</form>
+									
 										@endif
 
 									@endif
@@ -209,37 +447,37 @@
 									</div>
 									<div id="collapseOne" class="collapse " data-parent="#accordion">
 										<div class="card-body">
-											<table id="tbl_task_unassigned" class="table table-striped table-bordered">
-														<thead>
-															<tr>
+										<table id="tbl_task_unassigned" class="table table-striped table-bordered">
+													<thead>
+														<tr>
+															
+															<th class="text-nowrap">Task Information</th>
+															<th class="text-nowrap" width="30%">Action</th>
+														</tr>
+													</thead>
+													<tbody>
+														@foreach($task as $val)
+														<tr class="odd gradeX" id="{{$val->task_id}}">
+															
+															<td>
+																<p hidden>{{$val->task_id}}</p>
+					
+																<b style="margin-left: 20px; font-size: 15px">Task Summary:</b> 
+																<a style=" font-size: 15px; text-transform: uppercase; ">&nbsp&nbsp {{$val->task_summary}}</a>
+																<br>
+																<b style="margin-left: 20px; font-size: 15px">Task Details:</b> 
+																<a style=" font-size: 15px; text-transform: uppercase; ">&nbsp&nbsp {{$val->task_details}}</a>
 																
-																<th class="text-nowrap">Task Information</th>
-																<th class="text-nowrap" width="30%">Action</th>
-															</tr>
-														</thead>
-														<tbody>
-															@foreach($task as $val)
-															<tr class="odd gradeX" id="{{$val->task_id}}">
-																
-																<td>
-																	<p hidden>{{$val->task_id}}</p>
-						
-																	<b style="margin-left: 20px; font-size: 15px">Task Summary:</b> 
-																	<a style=" font-size: 15px; text-transform: uppercase; ">&nbsp&nbsp {{$val->task_summary}}</a>
-																	<br>
-																	<b style="margin-left: 20px; font-size: 15px">Task Details:</b> 
-																	<a style=" font-size: 15px; text-transform: uppercase; ">&nbsp&nbsp {{$val->task_details}}</a>
-																	
-																</td>
-																<td>
-																	<button class="btn btn-success" id="btn_add_task">Add</button>
-																</td>
-																
-															</tr>
-															@endforeach
+															</td>
+															<td>
+																<button class="btn btn-success" id="btn_add_task">Add</button>
+															</td>
+															
+														</tr>
+														@endforeach
 
-														</tbody>
-													</table>	
+													</tbody>
+										</table>	
 										</div>
 													
 											
@@ -509,6 +747,8 @@
 		</div>
 
 
+
+
 @section('page-js')
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.4.0/dropzone.js"></script>
 	<script src="../assets/plugins/dropzone/min/dropzone.min.js"></script>
@@ -521,10 +761,14 @@
 	<script src="{{asset('assets/plugins/ckeditor/ckeditor.js')}}"></script>
 	<script src="{{asset('assets/plugins/bootstrap-wysihtml5/dist/bootstrap3-wysihtml5.all.min.js')}}"></script>
 	<script src="{{asset('assets/js/demo/form-wysiwyg.demo.min.js')}}"></script>
+
 <script>
 
-    	$("#chat_task").hide()
-    	// alert('{{session('is_agent')}}')
+    $("#chat_task").hide()
+    $("#txt_update_summary").hide()
+	$("#sel_update_priority").hide()
+	$("#btn_cancel_edit").hide()
+	$("#sel_update_topic").hide()
     @foreach ($data as $val)
     
 	@if(($val->ticket_agent == session('user') || $val->ticket_agent == 0 ) && ($val->ticket_status != 'closed' ))
@@ -833,6 +1077,7 @@
             {
               // alert(Dropzone.forElement(".dropzone").files.length)
               Dropzone.forElement("#chatUpload").processQueue();
+              Dropzone.forElement("#chatUpload").removeAllFiles(true);
               console.log(data)
               is_scroll = 0;
               $("#txt_reply").val('')
@@ -893,12 +1138,15 @@
 	})
 
 	$(document).ready(function() {
+		document.getElementById("p_priority").innerHTML = "&nbsp&nbsp" + $("#sel_update_priority option[value="+$("#p_priority").text().trim()+"]").text();
+		$("#p_priority").text()
+		$("#p_priority option:contains("+$("#p_priority").text().trim()+")").attr('selected', 'selected');
 		$('#tbl_task_assigned').dataTable( {
 	  "ordering": false
-	} );
+		} );
 		$('#tbl_task_unassigned').dataTable( {
 	  "ordering": false
-	} );
+		} );
 		var active_button = $('.nav-tabs li a.active').attr('href');
 			 console.log(active_button)
 		count = 0;
@@ -931,6 +1179,71 @@
 		    
 		  }
 		});
+	});
+
+	$("#btn_edit").on('click', function(){
+		
+		if($("#btn_edit").text() == "Edit Ticket"){
+			$("#txt_update_summary").val($("#p_summary").text().trim())
+			$("#btn_edit").text("Update")
+			$("#btn_cancel_edit").show()
+			$("#p_summary").hide()
+			$("#p_priority").hide()
+			$("#p_topic").hide()
+			$("#txt_update_summary").show()
+			$("#sel_update_priority").show()
+			$("#sel_update_topic").show()
+			$("#sel_update_priority option:contains("+$("#p_priority").text().trim()+")").attr('selected', 'selected');
+			$("#sel_update_topic option:contains("+$("#p_topic").text().trim()+")").attr('selected', 'selected');
+			
+		}
+		else{
+			if($("#txt_update_summary").val().trim() ==	$("#p_summary").text().trim() && $( "#sel_update_priority option:selected" ).text().trim() ==	$("#p_priority").text().trim() && $( "#sel_update_topic option:selected" ).text().trim() == $("#p_topic").text().trim())
+			{
+				alert('same')
+			}
+			else
+			{
+				topic = ''
+				if($( "#sel_update_topic option:selected" ).text() == $("#p_topic").text())
+					topic = 0
+				else 
+					topic = $("#sel_update_topic").val()
+				alert($("#sel_update_topic").val())
+				$.ajax({
+		            url:'{{route('updateTicket')}}',
+		            type:'POST',
+		            
+		            data: {
+		              "_token": "{{ csrf_token() }}"
+		              ,'summary':$("#txt_update_summary").val()
+		              ,'ticket_id':$("#txt_ticket_id").val()
+		              ,'priority':$("#sel_update_priority").val()
+		              ,'topic':topic
+
+
+
+		              
+		            },
+		            success:function(data)
+		            {
+		              alert("asd")
+		            }
+		        })
+   			}  
+		}
+
+	});
+
+	$("#btn_cancel_edit").on('click', function(){
+		$("#btn_edit").text("Edit Ticket")
+		$("#p_summary").show()
+		$("#btn_cancel_edit").hide()
+		$("#p_priority").show()
+		$("#p_topic").show()
+		$("#txt_update_summary").hide()
+		$("#sel_update_priority").hide()
+		$("#sel_update_topic").hide()
 	});
 
 </script>

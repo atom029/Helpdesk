@@ -24,6 +24,7 @@ class TimelineController extends Controller
                  ->leftjoin('user', 'history.history_user_id', '=', 'user.user_id')
                 ->where('ticket.ticket_id',$id)
                 ->get();
+        
         // dd($data);
          $count = \DB::table('history')
                  ->leftjoin('ticket', 'history.history_ticket_id', '=', 'ticket.ticket_id')
@@ -143,8 +144,12 @@ class TimelineController extends Controller
                  ->where('access_request_approved','1')
                   ->where('access_request_expire','>',Carbon::now())
                  ->count();
+         $history = \DB::table('history')
+                 ->where('history_ticket_id',$id)
+                 ->get();
+        // dd($history);
         // dd($data);
-        return view('admin.timeline')->with('task',$task)->with('task_assigned',$task_assigned)->with('data',$data)->with('department',$department)->with('topic',$topic)->with('priority',$priority)->with('permission', $permission);
+        return view('admin.timeline')->with('task',$task)->with('task_assigned',$task_assigned)->with('data',$data)->with('department',$department)->with('topic',$topic)->with('priority',$priority)->with('permission', $permission)->with('history', $history);
     }
 
     /**

@@ -58,6 +58,7 @@ Route::post('/createSubTicket', 'TicketsController@subTicket')->name('createSubT
 Route::get('dept_agent/{id}', 'TicketsController@dept_agent')->name('dept_agent');
 Route::get('/random', 'TicketsController@random')->name('random');
 Route::post('/serverTicket', 'TicketsController@serverTicket')->name('serverTicket');
+Route::post('/updateTicket', 'TicketsController@update')->name('updateTicket');
 
 
 Route::post('/insertResponse', 'ResponseController@store')->name('insertResponse');

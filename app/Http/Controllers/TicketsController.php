@@ -323,9 +323,72 @@ class TicketsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        //
+        $department = \DB::TABLE('topic')
+                        ->join('department','department_id','topic_department')
+                        ->join('priority','priority_id','topic_priority')
+                        ->where('topic_id',request('topic'))
+                        ->select('department_id','priority_time_resolve','auto_assign','topic_priority')
+                        ->get();
+        // dd($department);
+        foreach ($department as $val) {
+            $department_id = $val->department_id;
+            $auto_assign = $val->auto_assign;
+        }
+        if(request('topic') == 0){
+            $data = \DB::table('ticket')
+                ->where('ticket_id',request('ticket_id'))
+                ->update(['ticket_priority' => request('priority'),'ticket_summary'=>request('summary')]);
+            \DB::TABLE('history')->INSERT(
+            [               
+                'history_ticket_id' => request('ticket_id'), 
+                'history_ticket_status' => '0',
+                'is_active' => '1', 
+                'history_user_id' => session('user'),
+                'history_response_id' => '0',
+                'history_status' => 'update ticket',
+                'history_department' => '0',
+                'history_transfer_department_id' => '0'
+              
+            ]);
+            return response()->json(['data' => $data]);
+        }
+        else{
+            if($auto_assign == 1)
+            {
+                $assignedAgent = $this->getAgent($department_id);
+                \DB::table('ticket')
+                        ->where('ticket_id',request('ticket_id'))
+                        ->update(['ticket_department_id' =>$department_id,'ticket_agent' => $assignedAgent, 'ticket_priority' => request('priority'),'ticket_topic'=>request('topic'),'ticket_summary'=>request('summary')]);
+            }
+            else{
+                \DB::table('ticket')
+                        ->where('ticket_id',request('ticket_id'))
+                        ->update(['ticket_department_id' =>$department_id,'ticket_agent' => 0, 'ticket_priority' => request('priority'),'ticket_topic'=>request('topic'),'ticket_summary'=>request('summary')]);
+            }
+            
+            \DB::TABLE('history')->INSERT(
+            [               
+                'history_ticket_id' => request('ticket_id'), 
+                'history_ticket_status' => '0',
+                'is_active' => '1', 
+                'history_user_id' => session('user'),
+                'history_response_id' => '0',
+                'history_status' => 'update topic',
+                'history_department' => '0',
+                'history_transfer_department_id' => '0'
+              
+            ]);
+            $data = \DB::TABLE('notification')->INSERT(
+            [               
+                'notification_ticket_id' => request('ticket_id'),
+                'notification_dept_id' => $department_id, 
+                'notification_is_read' => '0',
+                'notification_summary' => 'Update Ticket'
+            ]);
+            return response()->json(['data' => $data]);
+        }
     }
 
     /**
