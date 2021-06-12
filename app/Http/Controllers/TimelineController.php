@@ -12,7 +12,7 @@ class TimelineController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($id)
+    public function index($id)a
     {
 
          $data = \DB::table('history')
