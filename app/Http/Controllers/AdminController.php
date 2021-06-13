@@ -17,6 +17,7 @@ class AdminController extends Controller
         $open  = \DB::table('ticket')
                 ->where('ticket_status','open')
                 ->orwhere('ticket_status','Reopen')
+                ->orwhere('ticket_status','Overdue')
                 ->count();
         $overdue = \DB::table('ticket')
                 ->join('history', 'ticket.ticket_id', '=', 'history.history_ticket_id')

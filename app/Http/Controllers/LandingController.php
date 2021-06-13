@@ -171,6 +171,11 @@ class LandingController extends Controller
                 session(['is_admin' => $val->user_is_admin]);
                 session(['is_agent' => $val->user_is_agent]);
             }
+
+            \DB::TABLE('user')
+                ->where('user_id', session('user'))
+                ->update(['is_online' => '1']);
+
             return response()->json(['data' =>$data]);
         }
         }
@@ -187,10 +192,14 @@ class LandingController extends Controller
     }
 
     public function logout(){
+         \DB::TABLE('user')
+                ->where('user_id', session('user'))
+                ->update(['is_online' => '0']);
         Session::forget('user');
         Session::forget('name');
         $data = \DB::table('topic')->get();
-        return view('welcome')->with('data',$data);
+        return view('index')->with('data',$data);
+        
     }
 
     public function multifileupload()

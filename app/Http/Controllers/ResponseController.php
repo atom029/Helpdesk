@@ -71,7 +71,7 @@ class ResponseController extends Controller
             if($count == 0){
                 $data = \DB::TABLE('ticket')
                     ->where('ticket_id', request('ticket_id'))
-                    ->update(['ticket_status' => 'Answered','ticket_date' => $date]);
+                    ->update(['ticket_status' => 'Answered','ticket_date' => $date,'is_answered' => 1]);
                  $data = \DB::TABLE('history')->INSERT(
                 [               
                     'history_ticket_id' => request('ticket_id'), 
@@ -137,7 +137,7 @@ class ResponseController extends Controller
                 ->update(['notification_is_read' => '1']);
             \DB::TABLE('ticket')
                 ->where('ticket_id', request('ticket_id'))
-                ->update(['is_read_user' => '0','is_read_admin' => '1']);
+                ->update(['is_read_user' => '0','is_read_admin' => '1','is_answered' => 1]);
             $data = \DB::TABLE('notification')->INSERT(
             [               
                 'notification_ticket_id' => request('ticket_id'),

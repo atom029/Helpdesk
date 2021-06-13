@@ -42,7 +42,7 @@
 		@endforeach
         <!-- Reciever Message-->
         @foreach($data as $val)
-			@if($val->history_status == 'user reply' || $val->history_status == 'admin reply' )
+			@if($val->history_status == 'user reply' || $val->history_status == 'admin reply' || $val->history_status == 'admin answer' )
             	@if($val->history_user_id != session('user'))
 				<li class="media media-sm">
 					<a class="media-left" href="javascript:;">

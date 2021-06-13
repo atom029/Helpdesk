@@ -816,33 +816,46 @@
             summary = $(".txt_summary").val()
             issue = $(".txt_issue").val()
             // alert(priority)
-            $.ajax({
-                url:'{{route('createSubTicket')}}',
-                type:'POST',
-                
-                data: {
-                  "_token": "{{ csrf_token() }}"
-                  ,'topic':topic
-                  ,'summary':summary
-                  ,'issue':issue
-                  ,'mainTicket': ticket_id
-                  ,'department': department
-                  ,'agent': agent
-                  ,'priority': priority
-                },
-                success:function(data)
-                {
-                    swal("Success! Your ticket no: "+data.data+"", {
-                          icon: "success",
-                        }).then((willreload) => {
-                            if(willreload){
-                                window.location.reload()
-                            }
-                        });
-                  console.log(data)
-                   
-                }
-            })  
+
+            swal({
+	            title: "Are you sure?",
+	            text: "You want to open new ticket", 
+	            icon: "warning",
+	            buttons: true,
+	            dangerMode: true,
+	        })
+	        .then((willDelete) => {
+	         	if (willDelete) {
+	         		$.ajax({
+		                url:'{{route('createSubTicket')}}',
+		                type:'POST',
+		                
+		                data: {
+		                  "_token": "{{ csrf_token() }}"
+		                  ,'topic':topic
+		                  ,'summary':summary
+		                  ,'issue':issue
+		                  ,'mainTicket': ticket_id
+		                  ,'department': department
+		                  ,'agent': agent
+		                  ,'priority': priority
+		                },
+		                success:function(data)
+		                {
+		                    swal("Success! Your ticket no: "+data.data+"", {
+		                          icon: "success",
+		                        }).then((willreload) => {
+		                            if(willreload){
+		                                window.location.reload()
+		                            }
+		                        });
+		                   
+		                }
+		            })  
+				} 
+	        });
+
+            
         });
 	
 
@@ -873,22 +886,45 @@
 		ticket_id = $("#txt_ticket_id").val()
 		history_dept = $("#txt_history_department").val()
 		creator_user_id = $("#txt_ticket_user_id").val()
-		$.ajax({
-            url:'{{route('closedTicket')}}',
-            type:'POST',
-            
-            data: {
-              "_token": "{{ csrf_token() }}"
-              ,'ticket_id':ticket_id
-              ,'user_id':'{{session('user')}}'
-              ,'history_dept':history_dept
-              ,'creator_user_id':creator_user_id
-            },
-            success:function(data)
-            {
-              // window.location.reload()
-            }
-        })  
+
+		swal({
+            title: "Are you sure?",
+            text: "You want to close this ticket", 
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+        })
+        .then((willDelete) => {
+         	if (willDelete) {
+         		$.ajax({
+		            url:'{{route('closedTicket')}}',
+		            type:'POST',
+		            
+		            data: {
+		              "_token": "{{ csrf_token() }}"
+		              ,'ticket_id':ticket_id
+		              ,'user_id':'{{session('user')}}'
+		              ,'history_dept':history_dept
+		              ,'creator_user_id':creator_user_id
+		            },
+		            success:function(data)
+		            {
+		              swal("Success! Ticket has been closed", {
+                          icon: "success",
+                        }).then((willreload) => {
+                            if(willreload){
+                                window.location.reload()
+                            }
+                        });
+		            }
+
+        		})
+		  		
+			} 
+        });
+				
+
+		  
 	})
 
 	task_id = 0;
@@ -951,42 +987,52 @@
 		ticket_id = $("#txt_ticket_id").val()
 
 		var url = '{{ route("reopen", ":id") }}';
-    	url = url.replace(':id', ticket_id);
-		$.ajax({
-            type:'get',
-            url: url,
-            
-            
-          
-            success:function(data)
-            {
-            	console.log(data)
-            	if(data.data == '1'){
-            	swal("Success! Ticket has been reopened", {
-                          icon: "success",
-                        }).then((willreload) => {
-                            if(willreload){
-                                window.location.reload()
-                            }
-                        });
-                }
-                else
-                {
-                	swal("Error! Something went wrong", {
-                          icon: "error",
-                        }).then((willreload) => {
-                            if(willreload){
-                                window.location.reload()
-                            }
-                        });
-                }
-            }
-              	
-              
-              
-               
-            
-        })  
+
+		swal({
+            title: "Are you sure?",
+            text: "You want to reopen this ticket", 
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+        })
+        .then((willDelete) => {
+         	if (willDelete) {
+         		url = url.replace(':id', ticket_id);
+				$.ajax({
+		            type:'get',
+		            url: url,
+		            
+		            
+		          
+		            success:function(data)
+		            {
+		            	console.log(data)
+		            	if(data.data == '1'){
+		            		swal("Success! Ticket has been reopened", {
+	                        	icon: "success",
+	                        }).then((willreload) => {
+	                            if(willreload){
+	                                window.location.reload()
+	                            }
+	                        });
+		                }
+		                else
+		                {
+		                	swal("Error! Something went wrong", {
+		                          icon: "error",
+		                        }).then((willreload) => {
+		                            if(willreload){
+		                                window.location.reload()
+		                            }
+		                        });
+		                }
+		            }
+		        })  
+
+			} 
+        });
+
+    	
 	});
 
 	
@@ -997,26 +1043,44 @@
 		agent = $( "#sel_dept_user option:selected" ).val()
 		history_dept = $("#txt_history_department").val()
 		// alert(ticket_id)
-		$.ajax({
-            url:'{{route('transferDepartment')}}',
-            type:'POST',
-            
-            data: {
-              "_token": "{{ csrf_token() }}"
-              ,'ticket_id':ticket_id
-              ,'department':department
-              ,'user_id':'{{session('user')}}'
-              ,'history_dept':history_dept
-              ,'agent': agent
-              
-            },
-            success:function(data)
-            {
-              console.log(data)
-              
-               
-            }
-        })  
+		swal({
+            title: "Are you sure?",
+            text: "You want to transfer this ticket", 
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+        })
+        .then((willDelete) => {
+         	if (willDelete) {
+         		$.ajax({
+		            url:'{{route('transferDepartment')}}',
+		            type:'POST',
+		            
+		            data: {
+		              "_token": "{{ csrf_token() }}"
+		              ,'ticket_id':ticket_id
+		              ,'department':department
+		              ,'user_id':'{{session('user')}}'
+		              ,'history_dept':history_dept
+		              ,'agent': agent
+		              
+		            },
+		            success:function(data)
+		            {
+		              swal("Success! Ticket has been transfered", {
+	                        	icon: "success",
+	                        }).then((willreload) => {
+	                            if(willreload){
+	                                 window.location.href = "{{route('tickets')}}";
+	                            }
+	                        });
+		              
+		               
+		            }
+		        })  
+			} 
+        });
+		
 	});
 	
 
@@ -1210,26 +1274,46 @@
 				else 
 					topic = $("#sel_update_topic").val()
 				alert($("#sel_update_topic").val())
-				$.ajax({
-		            url:'{{route('updateTicket')}}',
-		            type:'POST',
-		            
-		            data: {
-		              "_token": "{{ csrf_token() }}"
-		              ,'summary':$("#txt_update_summary").val()
-		              ,'ticket_id':$("#txt_ticket_id").val()
-		              ,'priority':$("#sel_update_priority").val()
-		              ,'topic':topic
 
 
-
-		              
-		            },
-		            success:function(data)
-		            {
-		              alert("asd")
-		            }
+				swal({
+		            title: "Are you sure?",
+		            text: "You want to save changes", 
+		            icon: "warning",
+		            buttons: true,
+		            dangerMode: true,
 		        })
+		        .then((willDelete) => {
+		         	if (willDelete) {
+				  		$.ajax({
+				            url:'{{route('updateTicket')}}',
+				            type:'POST',
+				            
+				            data: {
+				              "_token": "{{ csrf_token() }}"
+				              ,'summary':$("#txt_update_summary").val()
+				              ,'ticket_id':$("#txt_ticket_id").val()
+				              ,'priority':$("#sel_update_priority").val()
+				              ,'topic':topic
+
+
+
+				              
+				            },
+				            success:function(data)
+				            {
+				            	swal("Success! Your changes has been saved", {
+		                          icon: "success",
+		                        }).then((willreload) => {
+		                            if(willreload){
+		                                window.location.reload()
+		                            }
+		                        });
+				            }
+				        })
+					} 
+		        });
+				
    			}  
 		}
 
