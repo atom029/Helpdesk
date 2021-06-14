@@ -18,6 +18,8 @@ Route::get('/', 'LandingController@index')->name('landing');
 Route::post('/getTicketInfo', 'LandingController@getTicketInfo')->name('getTicketInfo');
 Route::post('/sendFullConvo', 'SendEmailController@sendFullConvo')->name('sendFullConvo');
 Route::post('/checkTicket', 'SendEmailController@checkTicket')->name('checkTicket');
+Route::post('/sendReply', 'SendEmailController@sendReply')->name('sendReply');
+Route::post('/sendTicketNo', 'SendEmailController@sendTicketNo')->name('sendTicketNo');
 
 
 Route::get('/dashboard', 'DasboardController@index')->name('dashboard');
@@ -32,6 +34,9 @@ Route::post('/checkCred', 'LandingController@checkCred')->name('checkCred');
 
 Route::get('/user', 'UsersController@index')->name('user');
 Route::post('/insertUser', 'UsersController@store')->name('insertUser');
+Route::get('/agent', 'UsersController@agent')->name('agent');
+Route::post('/agentInfo', 'UsersController@agentInfo')->name('agentInfo');
+
 
 
 Route::post('assignTask', 'TaskController@store')->name('assignTask');
@@ -51,6 +56,7 @@ Route::post('/updateTopic', 'TopicsController@updateTopic')->name('updateTopic')
 Route::post('/deleteTopic', 'TopicsController@deleteTopic')->name('deleteTopic');
 
 
+Route::get('/getProfanityWords', 'TicketsController@getProfanityWords')->name('getProfanityWords');
 Route::get('/tickets', 'TicketsController@index')->name('tickets');
 Route::post('/ticketStatus', 'TicketsController@show')->name('ticketStatus');
 Route::post('/createTicket', 'TicketsController@store')->name('createTicket');
@@ -59,6 +65,7 @@ Route::get('dept_agent/{id}', 'TicketsController@dept_agent')->name('dept_agent'
 Route::get('/random', 'TicketsController@random')->name('random');
 Route::post('/serverTicket', 'TicketsController@serverTicket')->name('serverTicket');
 Route::post('/updateTicket', 'TicketsController@update')->name('updateTicket');
+Route::get('/agentTicket/{id}', 'TicketsController@agentTicket')->name('agentTicket');
 
 
 Route::post('/insertResponse', 'ResponseController@store')->name('insertResponse');

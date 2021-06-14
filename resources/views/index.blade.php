@@ -177,7 +177,7 @@
                                 <div class="col-md-6">
                                     <form action="/" name="wysihtml5" class="wysihtml5" method="">
                                         
-                                        <textarea class="textarea form-control txt_issue"  placeholder="Enter text ..." rows="5"></textarea>
+                                        <textarea class="textarea form-control txt_issue"  placeholder="Enter text ..." rows="5" onblur="check()"></textarea>
                                       
                                     </form>
                                 </div>
@@ -363,47 +363,162 @@
              $(".txt_issue").val('Main Issue')
         })
 
-
+        var profanity = ''
         $('#btn_createTicket').on('click',function(){
-            email = $(".txt_email").val()
-            // alert(email)
-            fname = $(".txt_fname").val()
-            mname = $(".txt_mname").val()
-            lname = $(".txt_lname").val()
-            contact_no = $(".txt_contact_no").val()
-            topic = $( ".sel_topic option:selected" ).val()
-            summary = $(".txt_summary").val()
-            issue = $(".txt_issue").val()
-            $.ajax({
-                url:'{{route('createTicket')}}',
-                type:'POST',
-                
-                data: {
-                  "_token": "{{ csrf_token() }}"
-                  ,'email':email
-                  ,'fname':fname
-                  ,'mname':mname
-                  ,'lname':lname
-                  ,'contact_no':contact_no
-                  ,'topic':topic
-                  ,'summary':summary
-                  ,'issue':issue
-                  
-                },
-                success:function(data)
-                {
-                    swal("Success! Your ticket no: "+data.data+"", {
-                          icon: "success",
-                        }).then((willreload) => {
-                            if(willreload){
-                                window.location.reload()
-                            }
-                        });
-                  console.log(data)
-                   
-                }
-            })  
+            
+            
+            
+            checkProfanity()
+            
         });
+
+        function checkProfanity(){
+           var profanity = 0
+           $issue = $(".txt_issue").val()
+           $summary = $(".txt_summary").val()
+           $.ajax({
+              url:'{{route('getProfanityWords')}}',
+              type:'get',
+              
+              async: !1,
+              success:function(data)
+              {
+                    // profanityWords = data
+                    // console.log(data)
+                    count = 0;
+                    $.each(data, function(i, item) {
+                        if($issue.includes(item[count]['profanity_word']) || $summary.includes(item[count]['profanity_word'])){
+                            profanity = 1
+                        }
+
+                        count++
+                    });
+                    email = $(".txt_email").val()
+                    // alert(email)
+                    fname = $(".txt_fname").val()
+                    mname = $(".txt_mname").val()
+                    lname = $(".txt_lname").val()
+                    contact_no = $(".txt_contact_no").val()
+                    topic = $( ".sel_topic option:selected" ).val()
+                    summary = $(".txt_summary").val()
+                    issue = $(".txt_issue").val()
+                    if(profanity == 1){
+                        swal({
+                            title: "Are you sure?",
+                            text: "We found some profanity word in this ticket!", 
+                            icon: "warning",
+                            buttons: true,
+                            dangerMode: true,
+                        })
+                        .then((willDelete) => {
+                            if (willDelete) {
+                                $.ajax({
+                                    url:'{{route('createTicket')}}',
+                                    type:'POST',
+                                    
+                                    data: {
+                                      "_token": "{{ csrf_token() }}"
+                                      ,'email':email
+                                      ,'fname':fname
+                                      ,'mname':mname
+                                      ,'lname':lname
+                                      ,'contact_no':contact_no
+                                      ,'topic':topic
+                                      ,'summary':summary
+                                      ,'issue':issue
+                                      ,'profanity': profanity
+                                      
+                                    },
+                                    success:function(data)
+                                    {
+
+                                        
+                                        ticket_no = data.data
+                                        alert(ticket_no)
+                                        $.ajax({
+                                            url:'{{route('sendTicketNo')}}',
+                                            type:'POST',
+                                            
+                                            data: {
+                                              "_token": "{{ csrf_token() }}"
+                                              ,"response": ticket_no
+                                              ,"email": email
+                                            },
+                                            success:function(data)
+                                            {
+                                                 swal("Success! We send the ticket no. to your email", {
+                                              
+                                              icon: "success",
+                                            }).then((willreload) => {
+                                                if(willreload){
+                                                    window.location.reload()
+                                                }
+                                            });
+                                               
+                                            }
+                                        }) 
+
+                                       
+                                    }
+                                }) 
+                            } 
+                        });
+                    }
+                    else{
+                        $.ajax({
+                            url:'{{route('createTicket')}}',
+                            type:'POST',
+                            
+                            data: {
+                              "_token": "{{ csrf_token() }}"
+                              ,'email':email
+                              ,'fname':fname
+                              ,'mname':mname
+                              ,'lname':lname
+                              ,'contact_no':contact_no
+                              ,'topic':topic
+                              ,'summary':summary
+                              ,'issue':issue
+                              ,'profanity': profanity
+                              
+                            },
+                            success:function(data)
+                            {
+
+                                    ticket_no = data.data
+                                    alert(ticket_no)
+                                        $.ajax({
+                                            url:'{{route('sendTicketNo')}}',
+                                            type:'POST',
+                                            
+                                            data: {
+                                              "_token": "{{ csrf_token() }}"
+                                              ,"ticket_no": ticket_no
+                                              ,"email": email
+                                            },
+                                            success:function(data)
+                                            {
+                                                 swal("Success! We send the ticket no. to your email", {
+                                              
+                                              icon: "success",
+                                            }).then((willreload) => {
+                                                if(willreload){
+                                                    window.location.reload()
+                                                }
+                                            });
+                                               
+                                            }
+                                        }) 
+                               
+                            }
+                        })  
+                    }
+                         
+              }
+          })
+          
+        }
+
 
 
         $("#btn_send_mail").click(function(){

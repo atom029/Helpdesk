@@ -22,7 +22,6 @@ class TicketsController extends Controller
                 ->join('user','ticket.ticket_user_id','user.user_id')
                 ->where('ticket_status','!=', 'closed')
                 ->where('emp_department_user_id', session('user'))
-                ->where('emp_department_is_active', '1')
                 ->where('ticket_agent', session('user'))
                 ->orderBy('priority_id', 'DESC')
 
@@ -36,7 +35,6 @@ class TicketsController extends Controller
                 ->join('user','ticket.ticket_user_id','user.user_id')
                 ->where('ticket_status','!=', 'closed')
                 ->where('emp_department_user_id', session('user'))
-                ->where('emp_department_is_active', '1')
                 ->where('ticket_agent', '0')
                 ->orderBy('priority_id', 'DESC')
 
@@ -51,6 +49,51 @@ class TicketsController extends Controller
                 ->join('department','emp_department_id','department_id')
                 ->join('topic','topic_department','department_id')
                 ->where('user_id',session('user'))
+                ->get(['topic_id','topic_summary']);
+        
+        
+        // dd($assigned);    
+        return view('admin.tickets')->with('assigned',$assigned)->with('unAssigned',$unAssigned)->with('data' , 'priority')->with('mainTicket',$mainTicket)->with('topic',$topic);
+    }
+
+    public function agentTicket($id){
+        $assigned = \DB::table('ticket')
+                ->join('topic', 'ticket.ticket_topic', '=', 'topic.topic_id')
+                ->join('priority','priority_id','topic_priority')
+                ->join('emp_department','emp_department.emp_department_id','ticket.ticket_department_id')
+                ->join('department', 'department.department_id', 'emp_department.emp_department_id')
+                ->join('user','ticket.ticket_user_id','user.user_id')
+                ->where('ticket_status','!=', 'closed')
+                ->where('emp_department_user_id', $id)
+                ->where('emp_department_is_active', '1')
+                ->where('ticket_agent', $id)
+                ->orderBy('priority_id', 'DESC')
+
+                ->get();
+        // dd($assigned);
+        $unAssigned = \DB::table('ticket')
+                ->join('topic', 'ticket.ticket_topic', '=', 'topic.topic_id')
+                ->join('priority','priority_id','topic_priority')
+                ->join('emp_department','emp_department.emp_department_id','ticket.ticket_department_id')
+                ->join('department', 'department.department_id', 'emp_department.emp_department_id')
+                ->join('user','ticket.ticket_user_id','user.user_id')
+                ->where('ticket_status','!=', 'closed')
+                ->where('emp_department_user_id', $id)
+                ->where('emp_department_is_active', '1')
+                ->where('ticket_agent', '0')
+                ->orderBy('priority_id', 'DESC')
+
+                ->get();
+
+        $mainTicket = \DB::table('sub_ticket')
+                        ->join('ticket', 'ticket.ticket_id', '=', 'main_ticket_id')
+        ->get();
+
+        $topic = \DB::table('emp_department')
+                ->join('user','emp_department_user_id','user_id')
+                ->join('department','emp_department_id','department_id')
+                ->join('topic','topic_department','department_id')
+                ->where('user_id',$id)
                 ->get(['topic_id','topic_summary']);
         
         
@@ -133,8 +176,12 @@ class TicketsController extends Controller
         }
 
         
-
-
+        $status = 1;
+        $ticketStatus = "open";
+        if(request("profanity") == 1){
+            $status = 0;
+            $ticketStatus = "Under Review";
+        }
         $date_add = Carbon::now()->addDays($days);
         
         $date = $this->holiday($date_add);
@@ -157,12 +204,15 @@ class TicketsController extends Controller
                 'ticket_details' => request('issue'),
                 'ticket_no' => $number,
                 'ticket_user_id' => $user_id,
+                'ticket_status' => $ticketStatus,
                 'ticket_department_id' => $department_id,
                 'ticket_date' => $date,
                 'is_read_admin' => 0,
                 'is_read_user' => 1,
                 'ticket_agent' => $assignedAgent,
-                'ticket_priority' => $priority
+                'ticket_priority' => $priority,
+                'profanityFlag' => request('profanity'),
+                'is_active' => $status
                 ]);
                 $ticket_id = \DB::getPdo()->lastInsertId();
             }
@@ -173,13 +223,16 @@ class TicketsController extends Controller
                 'ticket_summary' => request('summary'),
                 'ticket_details' => request('issue'),
                 'ticket_no' => $number,
+                'ticket_status' => $ticketStatus,
                 'ticket_user_id' => $user_id,
                 'ticket_department_id' => $department_id,
                 'ticket_date' => $date,
                 'is_read_admin' => 0,
                 'is_read_user' => 1,
                 'ticket_agent' => 0,
-                'ticket_priority' => $priority
+                'ticket_priority' => $priority,
+                'profanityFlag' => request('profanity'),
+                'is_active' => $status
                 ]);
                 $ticket_id = \DB::getPdo()->lastInsertId();
             }
@@ -191,7 +244,7 @@ class TicketsController extends Controller
                 'is_active' => '1', 
                 'history_user_id' => $user_id,
                 'history_response_id' => '0',
-                'history_status' => 'open',
+                'history_status' => $ticketStatus,
                 'history_department' => $department_id,
                 'history_transfer_department_id' => '0'
               
@@ -228,11 +281,14 @@ class TicketsController extends Controller
                 'ticket_department_id' => $department_id,
                 'ticket_no' => $number,
                 'ticket_user_id' => $user_id,
+                'ticket_status' => $ticketStatus,
                 'ticket_agent' => $assignedAgent,
                 'ticket_date' => $date,
                 'is_read_admin' => 0,
                 'is_read_user' => 1,
-                'ticket_priority' => $priority
+                'ticket_priority' => $priority,
+                 'profanityFlag' => request('profanity'),
+                'is_active' => $status
             ]);
             $ticket_id = \DB::getPdo()->lastInsertId();
             }
@@ -244,11 +300,14 @@ class TicketsController extends Controller
                 'ticket_department_id' => $department_id,
                 'ticket_no' => $number,
                 'ticket_user_id' => $user_id,
+                'ticket_status' => $ticketStatus,
                 'ticket_agent' => 0,
                 'ticket_date' => $date,
                 'is_read_admin' => 0,
                 'is_read_user' => 1,
-                'ticket_priority' => $priority
+                'ticket_priority' => $priority,
+                 'profanityFlag' => request('profanity'),
+                'is_active' => $status
             ]);
             $ticket_id = \DB::getPdo()->lastInsertId();
             }
@@ -260,7 +319,7 @@ class TicketsController extends Controller
                 'is_active' => '1', 
                 'history_user_id' => $user_id,
                 'history_response_id' => '0',
-                'history_status' => 'open',
+                'history_status' => $ticketStatus,
                 'history_transfer_department_id' => '0'
             ]);
             $data = \DB::TABLE('notification')->INSERT(
@@ -296,7 +355,7 @@ class TicketsController extends Controller
                 ->join('history', 'history.history_ticket_id', '=', 'ticket.ticket_id')
                 
                 ->where('ticket_no', request('ticket'))
-                ->whereRaw('(history_status = "open" or history_status = "admin answer" or history_status = "transfer" or history_status = "closed")')
+                ->whereRaw('(history_status = "open" or history_status = "admin answer" or history_status = "transfer" or history_status = "closed" or history_status = "Under Review") ')
                  
                 ->orderBy('history_id', 'asc')
 
@@ -735,6 +794,17 @@ class TicketsController extends Controller
         ]);
         // dd($user);
          return response()->json(['user' => $data]);
+    }
+
+
+    
+    public function getProfanityWords()
+    {
+          $data = \DB::table('profanity')
+                 
+                ->get();
+        // dd($user);
+         return response()->json(['profanity' => $data]);
     }
     
 }

@@ -128,4 +128,51 @@ class SendEmailController extends Controller
             return response()->json(['response' => "1"]);
        
     }
+
+
+    public function sendReply(Request $request){
+        $response_id = 0;
+        $response = \DB::table('response')->where('respone_id',request('response'))
+                ->join('history', 'history.history_response_id', '=', 'respone_id')
+                ->get();
+        foreach ($response as $key) {
+            $response_id = $key->response_ticket_id;
+        }
+        // dd($response_id);
+        
+        $file = \DB::table('file_upload')
+                ->where('file_upload.file_upload_ticket_id',$response_id)
+                ->get();
+            Mail::send('emailReply', 
+                [
+                    "data1"=>$response
+                    ,"file"=>$file
+                ],
+                function($message)
+                {   
+                     $message->from('PupSupport@gmail.com','PUP | Support')
+                    ->to(request('email'),request('email'))
+                    ->subject('Ticket Update');
+                });
+            
+            return response()->json(['response' => "1"]);
+       
+    }
+
+    public function sendTicketNo(Request $request){
+        
+            Mail::send('ticketEmail', 
+                [
+                    "data1"=>request("ticket_no")
+                ],
+                function($message)
+                {   
+                     $message->from('PupSupport@gmail.com','PUP | Support')
+                    ->to(request('email'),request('email'))
+                    ->subject('Ticket');
+                });
+            
+            return response()->json(['response' => "1"]);
+       
+    }
 }

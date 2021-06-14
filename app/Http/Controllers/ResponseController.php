@@ -165,7 +165,7 @@ class ResponseController extends Controller
         }
        
         
-        return response()->json(['data' => $data]);
+        return response()->json(['data' => $response_id]);
 
     }
 

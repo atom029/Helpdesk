@@ -75,6 +75,7 @@
 							
 							
 							@if($val->ticket_status != 'closed')
+								@if($val->ticket_agent == session('user') || $val->ticket_agent == 0 || $val->ticket_user_id == session('user'))
 							<button class="btn btn-info" id="btn_transfer" title="Transfer Ticket"><i class="fa fa-arrow-alt-circle-right fa-flip-vertical"></i></button>
 							<button class="btn btn-danger" id="btn_closed" title="Closed Ticket"><i class="fa fa-times-circle"></i></button>
 							<button class="btn btn-success" id="btn_create_ticket" title="Create Ticket"><i class="fa fa-plus-circle"></i></button>
@@ -97,6 +98,7 @@
 						</form>
 						@elseif($val->ticket_status == 'closed')
 						<button class="btn btn-success" id="btn_reopen" title="Reopen Ticket"><i class="fa fa-lock-open"></i></button>
+							@endif
 						@endif
 					</div>
 
@@ -133,7 +135,7 @@
 										<div class="col-lg-12">
 											<div class="row">
 												<h5>Email:</h5>
-												<p>&nbsp &nbsp {{$val->user_email}}</p>
+												<p id="p_email">&nbsp &nbsp {{$val->user_email}}</p>
 											</div>
 										</div>
 										<div class="col-lg-12">
@@ -1139,6 +1141,31 @@
             },
             success:function(data)
             {
+             responseID = data['data']
+
+            email = $("#p_email").text().trim()
+            alert(email)
+            
+            
+		        $.ajax({
+		        url:'{{route('sendReply')}}',
+		        type:'POST',
+		        
+		        data: {
+		          "_token": "{{ csrf_token() }}"
+		          ,"response": responseID
+		          ,"email": email
+		        },
+		        success:function(data)
+		        {
+		            console.log(data)
+		            // $("#txt_email_summary").val(data['response'][0]['ticket_summary'])
+		           
+		        }
+                    
+                   
+                
+            })  
               // alert(Dropzone.forElement(".dropzone").files.length)
               Dropzone.forElement("#chatUpload").processQueue();
               Dropzone.forElement("#chatUpload").removeAllFiles(true);

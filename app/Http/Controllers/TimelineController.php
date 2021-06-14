@@ -15,6 +15,8 @@ class TimelineController extends Controller
     public function index($id)
     {
 
+        
+
          $data = \DB::table('history')
                  ->leftjoin('ticket', 'history.history_ticket_id', '=', 'ticket.ticket_id')
                  ->leftjoin('response', 'response.respone_id', '=', 'history.history_response_id')
@@ -41,7 +43,7 @@ class TimelineController extends Controller
 
 
         return view('admin.dynamic.chat')->with('data',$data)->with('file',$file)->with('count',$count);
-        
+       
     }
 
     /**
@@ -107,49 +109,62 @@ class TimelineController extends Controller
      */
     public function show($id)
     {
-         $department = \DB::table('department')
-                     ->where('is_active',1)
-                     ->get();
-        $topic = \DB::table('topic')
-                     ->where('is_active',1)
-                     ->get();
+        $user = \DB::table('ticket')
+                ->where('ticket_id',$id)
+                ->get(['ticket_agent']);
+        foreach ($user as $key) {
+            $agent = $key->ticket_agent;
+        }
+        // dd(session('user'));
+        if($agent == session('user') || session('is_admin') == 1)
+        {
+             $department = \DB::table('department')
+                         ->where('is_active',1)
+                         ->get();
+            $topic = \DB::table('topic')
+                         ->where('is_active',1)
+                         ->get();
 
-         $priority = \DB::table('priority')
+             $priority = \DB::table('priority')
+                         ->get();
+                  
+             $data = \DB::table('history')
+                     ->leftjoin('ticket', 'history.history_ticket_id', '=', 'ticket.ticket_id')
+                     ->leftjoin('response', 'response.respone_id', '=', 'history.history_response_id')
+                     ->leftjoin('department', 'history.history_transfer_department_id', '=', 'department.department_id')
+                     ->leftjoin('topic', 'topic.topic_id', '=', 'ticket.ticket_topic')
+                     ->leftjoin('priority', 'topic.topic_priority', '=', 'priority.priority_id')
+                     ->leftjoin('user', 'history.history_user_id', '=', 'user.user_id')
+                    ->where('ticket.ticket_id',$id)
+                    ->get();
+                    // ->orderby('history_id', 'desc')->first();
+
+            // dd($data);
+
+             $task = \DB::select(\DB::raw("SELECT * FROM `task`
+                    where task_id not in (SELECT task_id from ticket_task WHERE ticket_task_ticket_id = '$id')"));
+                    
+             
+            $task_assigned = \DB::table('ticket_task')
+                    ->join('task','task.task_id','ticket_task.task_id')
+                     ->where('ticket_task.ticket_task_ticket_id',$id)
                      ->get();
-              
-         $data = \DB::table('history')
-                 ->leftjoin('ticket', 'history.history_ticket_id', '=', 'ticket.ticket_id')
-                 ->leftjoin('response', 'response.respone_id', '=', 'history.history_response_id')
-                 ->leftjoin('department', 'history.history_transfer_department_id', '=', 'department.department_id')
-                 ->leftjoin('topic', 'topic.topic_id', '=', 'ticket.ticket_topic')
-                 ->leftjoin('priority', 'topic.topic_priority', '=', 'priority.priority_id')
-                 ->leftjoin('user', 'history.history_user_id', '=', 'user.user_id')
-                ->where('ticket.ticket_id',$id)
-                ->get();
-                // ->orderby('history_id', 'desc')->first();
-
-        // dd($data);
-
-         $task = \DB::select(\DB::raw("SELECT * FROM `task`
-                where task_id not in (SELECT task_id from ticket_task WHERE ticket_task_ticket_id = '$id')"));
-                
-         
-        $task_assigned = \DB::table('ticket_task')
-                ->join('task','task.task_id','ticket_task.task_id')
-                 ->where('ticket_task.ticket_task_ticket_id',$id)
-                 ->get();
-        $permission = \DB::table('access_request')
-                 ->where('access_request_ticket_id',$id)
-                ->where('access_request_agent_id',session('user'))
-                 ->where('access_request_approved','1')
-                  ->where('access_request_expire','>',Carbon::now())
-                 ->count();
-         $history = \DB::table('history')
-                 ->where('history_ticket_id',$id)
-                 ->get();
-        // dd($history);
-        // dd($data);
-        return view('admin.timeline')->with('task',$task)->with('task_assigned',$task_assigned)->with('data',$data)->with('department',$department)->with('topic',$topic)->with('priority',$priority)->with('permission', $permission)->with('history', $history);
+            $permission = \DB::table('access_request')
+                     ->where('access_request_ticket_id',$id)
+                    ->where('access_request_agent_id',session('user'))
+                     ->where('access_request_approved','1')
+                      ->where('access_request_expire','>',Carbon::now())
+                     ->count();
+             $history = \DB::table('history')
+                     ->where('history_ticket_id',$id)
+                     ->get();
+            // dd($history);
+            // dd($data);
+            return view('admin.timeline')->with('task',$task)->with('task_assigned',$task_assigned)->with('data',$data)->with('department',$department)->with('topic',$topic)->with('priority',$priority)->with('permission', $permission)->with('history', $history);
+        }
+        else{
+            return redirect('/');
+        }
     }
 
     /**

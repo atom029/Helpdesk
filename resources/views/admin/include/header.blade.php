@@ -88,7 +88,9 @@
 					    </a>
 						<ul class="sub-menu">
 							<li class="active"><a href="{{ route('user') }}">User</a></li>
+							<li class=""><a href="{{ route('agent') }}">Agent</a></li>
 						    <li class=""><a href="{{ route('department') }}">Department</a></li>
+
 						    <li><a href="{{ route('topic') }}">Topic</a></li>
 						</ul>
 						<li class="has-sub ">
